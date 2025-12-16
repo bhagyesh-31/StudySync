@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bhagyesh Bhalerao Study Materials</title>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-gradient"></div>
+
+  <!-- Login Page -->
+  <div id="loginPage" class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <h2>🎓 Welcome Back</h2>
+        <p id="loginSubtitle">Enter your credentials to continue</p>
+      </div>
+      
+      <!-- Student Login Form -->
+      <form id="studentLoginForm">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="studentName" class="form-input" placeholder="Enter your name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">College Name</label>
+          <input type="text" id="studentCollege" class="form-input" placeholder="Enter your college" required>
+        </div>
+        <button type="submit" class="btn-login">Login as Student</button>
+        <div class="error-message" id="studentError">Please fill in all fields</div>
+      </form>
+      
+      <!-- Admin Login Form -->
+      <form id="adminLoginForm" class="hidden">
+        <div class="form-group">
+          <label class="form-label">Admin Password</label>
+          <input type="password" id="adminPassword" class="form-input" placeholder="Enter admin password" required>
+        </div>
+        <button type="submit" class="btn-login">Login as Admin</button>
+        <div class="error-message" id="adminError">Incorrect password</div>
+      </form>
+      
+      <div class="login-divider">or</div>
+      
+      <button class="btn-switch" id="switchLoginBtn" onclick="toggleLoginMode()">Switch to Admin Login</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="header hidden" id="mainHeader">
+    <div class="nav-container">
+      <div class="logo">📚 Bhagyesh Bhalerao Study Materials</div>
+      <div class="user-info" id="userInfo"></div>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- Admin Dashboard -->
+  <div id="adminDashboard" class="hidden">
+    <div class="admin-container">
+      <div class="admin-tabs">
+        <button class="tab-btn active" onclick="switchTab('notes')">📝 Manage Notes</button>
+        <button class="tab-btn" onclick="switchTab('analytics')">📊 Student Analytics</button>
+      </div>
+      
+      <!-- Notes Tab -->
+      <div id="notesTab" class="tab-content active">
+        <div class="note-card" style="max-width: 800px; margin: 0 auto; margin-bottom: var(--space-32);">
+          <h3 style="margin-bottom: var(--space-24);">Add New Note</h3>
+          <form id="addNoteForm">
+            <div class="form-group">
+              <label class="form-label">Title</label>
+              <input type="text" id="noteTitle" class="form-input" placeholder="e.g., Data Structures Fundamentals" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subject</label>
+              <select id="noteSubject" class="form-input" required>
+                <option value="">Select subject</option>
+                <option value="FDS">FDS</option>
+                <option value="MFCE">MFCE</option>
+                <option value="COA">COA</option>
+                <option value="MDM-CIVIL">MDM-CIVIL</option>
+                <option value="OE">OE</option>
+                <option value="EEM">EEM</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Semester</label>
+              <select id="noteSemester" class="form-input" required>
+                <option value="">Select semester</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+                <option value="7">Semester 7</option>
+                <option value="8">Semester 8</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <textarea id="noteDescription" class="form-input" rows="3" placeholder="Brief description of the notes" required></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Google Drive Link</label>
+              <input type="url" id="noteDriveLink" class="form-input" placeholder="https://drive.google.com/file/d/..." required>
+            </div>
+            <button type="submit" class="btn-login">Add Note</button>
+          </form>
+        </div>
+        
+        <!-- View All Notes Section -->
+        <div class="students-table">
+          <div class="table-header">
+            <h3>All Notes (Total: <span id="totalNotes">0</span>)</h3>
+            <input type="text" id="notesSearch" class="table-search" placeholder="Search notes..." oninput="filterNotesTable()">
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th style="cursor: pointer;" onclick="sortNotesTable('subject')">Subject ↕</th>
+                  <th style="cursor: pointer;" onclick="sortNotesTable('semester')">Semester ↕</th>
+                  <th style="cursor: pointer;" onclick="sortNotesTable('title')">Title ↕</th>
+                  <th>Description</th>
+                  <th>Google Drive Link</th>
+                  <th style="cursor: pointer;" onclick="sortNotesTable('date')">Date Added ↕</th>
+                  <th style="min-width: 280px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="notesTableBody">
+                <tr>
+                  <td colspan="7" style="text-align: center; color: rgba(255, 255, 255, 0.5);">No notes available</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Analytics Tab -->
+      <div id="analyticsTab" class="tab-content">
+        <div style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--radius-lg); padding: var(--space-24); margin-bottom: var(--space-32);">
+          <h2 style="color: white; font-size: var(--font-size-2xl); margin-bottom: var(--space-12);">📊 Student Analytics Dashboard</h2>
+          <p style="color: rgba(255, 255, 255, 0.7); margin: 0;">Track student engagement and login activity in real-time. All data is synced automatically from Firebase.</p>
+        </div>
+        
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-lg); padding: var(--space-20); margin-bottom: var(--space-24);">
+          <h3 style="color: var(--active-green); font-size: var(--font-size-lg); margin-bottom: var(--space-8); display: flex; align-items: center; gap: var(--space-8);">
+            <span>✅</span> Duplicate Prevention &amp; Multiple Access Policy
+          </h3>
+          <p style="color: rgba(255, 255, 255, 0.8); font-size: var(--font-size-sm); margin: 0;">
+            <strong>Duplicate Prevention:</strong> Only one Firestore entry per student (case-insensitive: "John" = "john").<br>
+            <strong>Multiple Access:</strong> Students with active sessions can enter the website unlimited times.<br>
+            <strong>Session Management:</strong> Students can logout and login again anytime.
+          </p>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>🎯 Total Students Logged In</h3>
+            <div class="stat-value" id="totalStudents">0</div>
+          </div>
+        </div>
+        
+        <div class="students-table">
+          <div class="table-header">
+            <h3>📊 Student Login Records - Real-Time Data</h3>
+            <input type="text" id="studentSearch" class="table-search" placeholder="Search students..." oninput="filterStudents()">
+          </div>
+          <div style="padding: var(--space-16); background: rgba(6, 182, 212, 0.1); border-bottom: 1px solid rgba(6, 182, 212, 0.2);">
+            <p style="color: rgba(255, 255, 255, 0.8); font-size: var(--font-size-sm); margin: 0;">
+              🔄 This table updates automatically when students log in. Data is synced with Firebase Realtime Database.
+            </p>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 20%;">Student Name</th>
+                  <th style="width: 25%;">College Name</th>
+                  <th style="width: 20%;">Login Date</th>
+                  <th style="width: 15%;">Login Time</th>
+                  <th style="width: 20%;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="studentsTableBody">
+                <tr>
+                  <td colspan="5" style="text-align: center; padding: var(--space-48); color: rgba(255, 255, 255, 0.5); font-size: var(--font-size-lg);">
+                    <div style="margin-bottom: var(--space-16);">📊</div>
+                    <div>No students have logged in yet</div>
+                    <div style="font-size: var(--font-size-sm); margin-top: var(--space-8); opacity: 0.7;">Students will appear here when they log in from the main page</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero hidden" id="heroSection">
+    <h1>
+      Your Gateway to <span class="gradient-text">Academic Excellence</span>
+    </h1>
+    <p>Access comprehensive study materials across all subjects and semesters</p>
+  </section>
+
+  <!-- Search & Filters -->
+  <section class="search-section hidden" id="searchSection">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search by subject, title, or keywords..." oninput="filterNotes()">
+    </div>
+    
+    <div class="filters">
+      <select class="filter-select" id="subjectFilter" onchange="filterNotes()">
+        <option value="">All Subjects</option>
+        <option value="FDS">FDS</option>
+        <option value="MFCE">MFCE</option>
+        <option value="COA">COA</option>
+        <option value="MDM-CIVIL">MDM-CIVIL</option>
+        <option value="Digital Marketing">Digital Marketing</option>
+        <option value="EEM">EEM</option>
+      </select>
+      
+      <select class="filter-select" id="semesterFilter" onchange="filterNotes()">
+        <option value="">All Semesters</option>
+        <option value="1">Semester 1</option>
+        <option value="2">Semester 2</option>
+        <option value="3">Semester 3</option>
+        <option value="4">Semester 4</option>
+        <option value="5">Semester 5</option>
+        <option value="6">Semester 6</option>
+        <option value="7">Semester 7</option>
+        <option value="8">Semester 8</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Notes Grid -->
+  <section class="notes-container hidden" id="notesSection">
+    <div class="notes-grid" id="notesGrid">
+      <!-- Notes will be dynamically inserted here -->
+    </div>
+  </section>
+
+  <!-- Edit Note Modal -->
+  <div class="modal" id="editNoteModal">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2>Edit Note</h2>
+        <button class="close-btn" onclick="closeEditModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="editNoteForm">
+          <input type="hidden" id="editNoteId">
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input type="text" id="editNoteTitle" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Subject</label>
+            <select id="editNoteSubject" class="form-input" required>
+              <option value="FDS">FDS</option>
+              <option value="MFCE">MFCE</option>
+              <option value="COA">COA</option>
+              <option value="MDM-CIVIL">MDM-CIVIL</option>
+              <option value="Digital Marketing">Digital Marketing</option>
+              <option value="EEM">EEM</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Semester</label>
+            <select id="editNoteSemester" class="form-input" required>
+              <option value="1">Semester 1</option>
+              <option value="2">Semester 2</option>
+              <option value="3">Semester 3</option>
+              <option value="4">Semester 4</option>
+              <option value="5">Semester 5</option>
+              <option value="6">Semester 6</option>
+              <option value="7">Semester 7</option>
+              <option value="8">Semester 8</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea id="editNoteDescription" class="form-input" rows="3" required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Google Drive Link</label>
+            <input type="url" id="editNoteDriveLink" class="form-input" required>
+          </div>
+          <div style="display: flex; gap: var(--space-12);">
+            <button type="submit" class="btn-login" style="flex: 1;">Save Changes</button>
+            <button type="button" class="btn-secondary" style="flex: 1; padding: var(--space-16);" onclick="closeEditModal()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF Viewer Modal -->
+  <div class="modal" id="pdfModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">View PDF</h2>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <iframe id="pdfViewer" class="pdf-viewer"></iframe>
+      </div>
+      <div class="modal-footer">
+        <a id="downloadLink" class="btn btn-primary" style="flex: none;" target="_blank">
+          📥 Download PDF
+        </a>
+        <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+<!-- Feedback Section -->
+<section class="feedback-section hidden" id="feedbackSection">
+  <div class="feedback-container">
+    <h2>⭐ Student Feedback & Ratings</h2>
+    <p class="feedback-subtitle">
+      Share your honest feedback so other students can benefit from this platform.
+    </p>
+
+    <!-- Feedback form -->
+    <form id="feedbackForm" class="feedback-form">
+      <div class="form-group">
+        <label class="form-label">Your Rating</label>
+        <div class="rating-stars" id="ratingStars">
+          <span data-value="1">★</span>
+          <span data-value="2">★</span>
+          <span data-value="3">★</span>
+          <span data-value="4">★</span>
+          <span data-value="5">★</span>
+        </div>
+        <input type="hidden" id="feedbackRating" value="0" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Write your feedback</label>
+        <textarea id="feedbackText" class="form-input" rows="3"
+          placeholder="Tell how this platform helped you, what to improve, etc." required></textarea>
+      </div>
+
+      <button type="submit" class="btn-login">Submit Feedback</button>
+    </form>
+
+    <!-- Feedback list visible to all users -->
+    <div class="feedback-list" id="feedbackList">
+      <!-- Feedback cards will be inserted here -->
+    </div>
+  </div>
+</section>
+
+  <!-- Footer -->
+<footer class="footer hidden" id="mainFooter">
+  <div class="footer-content">
+    <p><strong>&copy; 2025 Bhagyesh Vijay Bhalerao. All rights reserved.</strong></p>
+    <p style="font-size: var(--font-size-sm); margin-top: var(--space-8);">
+      Premium study materials for engineering students.
+    </p>
+
+    <div class="footer-links">
+      <!-- LinkedIn -->
+      <a href="https://www.linkedin.com/in/bhagyesh-bhalerao-aa1639318?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+         target="_blank" rel="noopener">
+        <span class="footer-icon">in</span>
+        <span>Connect on LinkedIn</span>
+      </a>
+
+      <!-- Email: opens default mail client / Gmail -->
+      <a href="mailto:bhagyeshbhalerao1@gmail.com?subject=Regarding%20Study%20Materials%20Platform&body=Hi%20Bhagyesh,%0D%0A%0D%0A">
+        <span class="footer-icon">@</span>
+        <span>Contact via Email</span>
+      </a>
+    </div>
+
+    <p style="font-size: var(--font-size-xs); margin-top: var(--space-16); opacity: 0.7;">
+      For collaborations, suggestions, doubts, or feedback about this platform, feel free to reach out anytime.
+    </p>
+  </div>
+</footer>
+
+  </footer>
+
+  <!-- Main Script -->
+  <script src="script.js"></script>
+</body>
+</html>
