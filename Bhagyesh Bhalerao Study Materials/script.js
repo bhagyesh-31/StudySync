@@ -1,12 +1,6 @@
 // ================= Firebase Configuration (NEW PROJECT: bhagyesh-bhalerao-studyhub) =================
 const firebaseConfig = {
-  apiKey: "AIzaSyD28SkH0Nf58IF3IugAx573z5SOvwiBsAk",
-  authDomain: "bhagyesh-bhalerao-studyhub.firebaseapp.com",
-  projectId: "bhagyesh-bhalerao-studyhub",
-  storageBucket: "bhagyesh-bhalerao-studyhub.firebasestorage.app",
-  messagingSenderId: "179399267428",
-  appId: "1:179399267428:web:18958d77a5c9f5b82d3b71",
-  measurementId: "G-QQPHCZLZB1"
+// Your Firebase Configuaration will come here 
 };
 
 // ================= Initialize Firebase (compat SDK already loaded in index.html) =================
@@ -892,3 +886,4 @@ window.addEventListener('DOMContentLoaded', function() {
     console.log('ℹ️ No active session - showing login page');
   }
 });
+
