@@ -8,6 +8,29 @@ Dr. D. Y. Patil College of Engineering (DYPCOE), Akurdi, Pune
 For any queries, collaboration opportunities, or project discussions, please reach out via email or LinkedIn.
 A web-based platform for students to access semester-wise study materials and for admins to manage notes and student analytics.
 
+---
+📸 Screenshots – User to Admin Flow
+---
+🎓 Student Login
+![Student Login](assets/images/Student%20Login.png)
+---
+🏠 Home Page
+![Home Page](assets/images/Home%20page%20.png)
+---
+📝 Students Feedback Section
+![Students Feedback Section](assets/images/Students%20Feedback%20Section.png)
+---
+🔐 Admin Login
+![Admin Login](assets/images/Admin%20Login.png)
+---
+📚 Admin Dashboard – Notes Management
+![Admin Dashboard Notes Section](assets/images/Admin%20Dashboard%20Notes%20Section.png)
+---
+📊 Admin Dashboard – Student Analytics
+![Admin Dashboard Student Analytics](assets/images/Admin%20Dashboard%20Student%20Analytics.png)
+![Admin Dashboard Student Analytic](assets/images/Admin%20Dashboard%20Student%20Analytic.png)
+---
+
 ## 🔥 Features
 - Student login (name + college)
 - Admin dashboard
@@ -23,10 +46,15 @@ A web-based platform for students to access semester-wise study materials and fo
 
 ## 📂 Project Structure
 index.html
+---
 style.css
+---
 script.js
+---
 fonts/
+---
 assets/
+---
 
 
 ## 🚀 How to Run Locally
